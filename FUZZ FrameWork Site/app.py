@@ -1,22 +1,23 @@
-from flask import Flask,render_template,render_template_string,send_from_directory,request,redirect,url_for
+from flask import Flask, render_template, render_template_string, send_from_directory, request, redirect, url_for, jsonify, make_response
 from os import popen
-from flask import Flask, request, jsonify
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta
 import urllib.parse
 
-app=Flask(__name__)
+app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = 'lol_i_am_the_admin'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+app.config['JWT_TOKEN_LOCATION'] = ['cookies']
+app.config['JWT_COOKIE_CSRF_PROTECT'] = False  
 
-jwt=JWTManager(app)
+jwt = JWTManager(app)
 
 # Command injection filter 
 def filter(cmd):
-    notAllowed=["flag.txt","cat","head","tail","flag"]
+    notAllowed = ["flag.txt", "cat", "head", "tail", "flag"]
     for c in notAllowed:
-        if c in cmd :
+        if c in cmd:
             return False
     return True
 
@@ -31,9 +32,9 @@ def template():
     name = request.args.get("name")
     if name:
         if '{' in name or '}' in name:
-            return render_template_string("Hacker",status_word="Hacker"), 403
+            return render_template_string("Hacker", status_word="Hacker"), 403
 
-    html=f"""
+    html = f"""
     <!DOCTYPE html>
     <html>
     <body>
@@ -43,36 +44,57 @@ def template():
     """
     return render_template_string(html)
 
-# Command injection challenge
+# Command injection 
 @app.route("/run")
+@jwt_required()
 def about():
+    current_user = get_jwt_identity()
     cmd = request.args.get('cmd', '')
     
     if not cmd:
-        return render_template("run.html")
-    cmd = request.args.get('cmd', '')
+        return render_template("run.html", user=current_user)
     
     allowed = filter(cmd)
     if not allowed:
-        return render_template("run.html",output="Hacker"), 403
+        return render_template("run.html", output="Hacker", user=current_user), 403
     
-    output=popen(f"ping -c 2 {cmd}").read()
-    return render_template("run.html",output=f"{output}")
+    output = popen(f"ping -c 2 {cmd}").read()
+    return render_template("run.html", output=f"{output}", user=current_user)
 
-@app.route("/login",methods=["GET", "POST"])
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    if request.method=="GET":
+    if request.method == "GET":
         return render_template("login.html")
-    elif request.method=="POST":
-
+    elif request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        
         if not username or not password:
-            return jsonify({"error": "Email and password required"}), 400
+            return jsonify({"error": "Username and password required"}), 400
 
-        username = request.form["username"]
-        password = request.form["password"]
-        if username=="admin" and password=="admin":
-            return redirect(url_for("home"))
+        if username == "admin" and password == "admin":
+            # Create JWT token
+            access_token = create_access_token(identity=username)
+            
+            # Create response and set JWT token in cookie
+            response = make_response(redirect(url_for("home")))
+            response.set_cookie('access_token_cookie', access_token, httponly=True, max_age=3600)
+            
+            return response
+        else:
+            return render_template("login.html", error="Invalid credentials"), 401
+
+@app.route("/logout", methods=["POST"])
+def logout():
+    response = make_response(redirect(url_for("home")))
+    response.set_cookie('access_token_cookie', '', expires=0)
+    return response
 
 
-if __name__=="__main__":
-    app.run(debug=True,host='0.0.0.0', port=5000)
+# Handle unauthorized access
+@jwt.unauthorized_loader
+def unauthorized_callback(callback):
+    return redirect(url_for('login'))
+
+if __name__ == "__main__":
+    app.run(debug=True, host='0.0.0.0', port=5000)
