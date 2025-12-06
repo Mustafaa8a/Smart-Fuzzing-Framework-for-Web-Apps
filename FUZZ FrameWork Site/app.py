@@ -1,6 +1,6 @@
 from flask import Flask, render_template, render_template_string, send_from_directory, request, redirect, url_for, jsonify, make_response
 from os import popen
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta
 import urllib.parse
@@ -23,12 +23,16 @@ def filter(cmd):
 
 # Home page
 @app.route("/")
+@jwt_required()
 def home():
+    current_user = get_jwt_identity()
     return send_from_directory("templates", "index.html")
 
 # SSTI challenge
 @app.route("/template")
+@jwt_required()
 def template():
+    current_user = get_jwt_identity()
     name = request.args.get("name")
     if name:
         if '{' in name or '}' in name:
@@ -73,8 +77,11 @@ def login():
             return jsonify({"error": "Username and password required"}), 400
 
         if username == "admin" and password == "admin":
-            # Create JWT token
-            access_token = create_access_token(identity=username)
+            # Create JWT token with username and password
+            access_token = create_access_token(
+                identity=username,
+                additional_claims={"password": password}
+            )
             
             # Create response and set JWT token in cookie
             response = make_response(redirect(url_for("home")))
@@ -86,15 +93,21 @@ def login():
 
 @app.route("/logout", methods=["POST"])
 def logout():
-    response = make_response(redirect(url_for("home")))
+    response = make_response(redirect(url_for("login")))
     response.set_cookie('access_token_cookie', '', expires=0)
     return response
 
 
-# Handle unauthorized access
+# Handle unauthorized access - redirect to login
 @jwt.unauthorized_loader
 def unauthorized_callback(callback):
     return redirect(url_for('login'))
+
+# Admin
+@app.route("/admin")
+@jwt_required()
+def admin():
+    return render_template("admin.html")
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5000)
