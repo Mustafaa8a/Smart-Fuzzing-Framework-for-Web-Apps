@@ -34,6 +34,9 @@ parser.add_argument("-pass", "--passwords",
 parser.add_argument("-ci", "--commandInjection", 
                     nargs="?", const=True, default=False,
                     help="Command injection fuzzing mode (optional wordlist after flag)")
+parser.add_argument("-lfi", "--localFileInclusion", 
+                    nargs="?", const=True, default=False,
+                    help="Local File Inclusion fuzzing mode (optional wordlist after flag)")
 
 
 # Parse them
@@ -48,6 +51,7 @@ fileFuzz= args.filefuzz
 fuzz= args.fuzz 
 pasw= args.passwords 
 ci= args.commandInjection 
+lfi= args.localFileInclusion
 
 # Parse header and split them as a key and value in a dictionary 
 def parseHeaders(raw_headers):
@@ -69,7 +73,8 @@ def get_default_wordlist(mode):
         "file": "/usr/share/seclists/Discovery/Web-Content/raft-small-files.txt",
         "fuzz": "/usr/share/seclists/Discovery/Web-Content/common.txt",
         "pass":"/usr/share/wordlists/rockyou.txt",
-        "ci": "ci.txt"
+        "ci": "ci.txt",
+        "lfi": "lfi.txt"
     }
     return defaults[mode]
 
@@ -162,7 +167,56 @@ def cmdI(wordlistPath):
                     print(f"{Fore.RED}[!] Unexpected error with payload: {line}{Style.RESET_ALL}")
                     print(f"    Error: {e}")
 
+def lfiF(wordlistPath):
+    try:
+        # Check if FUZZ keyword exists
+        if data and "FUZZ" not in data:
+            print(f"{Fore.RED}[-] Error: No FUZZ keyword found in data!{Style.RESET_ALL}")
+            return
+        
+        if not data:
+            print(f"{Fore.RED}[-] Error: No data provided! Use -d flag with FUZZ keyword{Style.RESET_ALL}")
+            return
 
+        with open(f"{wordlistPath}", "r", encoding="utf-8", errors="ignore") as file:
+            for line in file:
+                line = line.strip()
+                if not line:
+                    continue
+
+                # Replace FUZZ in the payload
+                payload = data.replace("FUZZ", line)
+
+                try:
+                    res = requests.request(
+                        method=mehtod,
+                        url=url,
+                        data=payload,
+                        timeout=10,
+                        allow_redirects=False,
+                        headers=headers
+                    )
+
+                    # Detection of flag in response
+                    if "flag{" in res.text:
+                        print(f"{Fore.RED}[+] LFI detected{Style.RESET_ALL}")
+                        print(f"{Fore.GREEN}[+] Working payload: \"{line}\" [{res.status_code}]{Style.RESET_ALL}")
+                        print("-"*60)
+
+                except requests.exceptions.Timeout:
+                    print(f"{Fore.YELLOW}[!] Timeout for payload: {line}{Style.RESET_ALL}")
+
+                except requests.exceptions.ConnectionError:
+                    print(f"{Fore.YELLOW}[!] Connection error for payload: {line}{Style.RESET_ALL}")
+
+                except Exception as e:
+                    print(f"{Fore.RED}[!] Unexpected error with payload: {line}{Style.RESET_ALL}")
+                    print(f"    Error: {e}")
+
+    except FileNotFoundError:
+        print(f"{Fore.RED}[-] Error: Wordlist file not found: {wordlistPath}{Style.RESET_ALL}")
+    except Exception as e:
+        print(f"{Fore.RED}[-] Error reading wordlist: {str(e)}{Style.RESET_ALL}")
  
 
 def main():
@@ -250,6 +304,21 @@ def main():
             print("-"*60)
 
         cmdI(wordlist)
+        
+    if args.localFileInclusion:
+        print("[+] Started testing for local file inclusion")
+        print("-"*60)
+
+        if args.localFileInclusion is True:
+            wordlist = get_default_wordlist("lfi")
+            print(f"Using default: {wordlist}")
+            print("-"*60)
+        else:
+            wordlist = args.localFileInclusion
+            print(f"Using custom: {wordlist}")
+            print("-"*60)
+
+        lfiF(wordlist)
 
 if __name__=="__main__":
     main()

