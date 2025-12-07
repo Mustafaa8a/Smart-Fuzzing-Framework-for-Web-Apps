@@ -31,7 +31,7 @@ parser.add_argument("-search", "--fuzz",
 parser.add_argument("-pass", "--passwords", 
                     nargs="?", const=True, default=False,
                     help="Fuzzing passowrds mode (optional wordlist after flag)")
-parser.add_argument("-ci", "--commandinjection", 
+parser.add_argument("-ci", "--commandInjection", 
                     nargs="?", const=True, default=False,
                     help="Command injection fuzzing mode (optional wordlist after flag)")
 
@@ -47,6 +47,7 @@ dirFuzz= args.dirfuzz
 fileFuzz= args.filefuzz 
 fuzz= args.fuzz 
 pasw= args.passwords 
+ci= args.commandInjection 
 
 # Parse header and split them as a key and value in a dictionary 
 def parseHeaders(raw_headers):
@@ -94,7 +95,7 @@ def search(wordlistPath, fc, mc):
                         print(f"{Fore.RED}[-] Error: No FUZZ keyword found in URL or data!{Style.RESET_ALL}")
                         return
                     
-                    
+
 
                     # Match specific status code
                     if mc is not None:
@@ -122,9 +123,47 @@ def search(wordlistPath, fc, mc):
         print(f"{Fore.RED}[-] Error reading wordlist: {str(e)}{Style.RESET_ALL}")
 
 
+def cmdI(wordlistPath):
+    with open(f"{wordlistPath}", "r", encoding="utf-8", errors="ignore") as file:
+        for line in file:
+            line = line.strip()
+            if not line:
+                continue
+
+            # Only run if mode enabled AND FUZZ exists
+            if args.commandInjection and "FUZZ" in data:
+
+                # Replace FUZZ in the payload (correct behavior)
+                payload = data.replace("FUZZ", line)
+
+                try:
+                    res = requests.request(
+                        method=mehtod,
+                        url=url,
+                        data=payload,
+                        timeout=10,
+                        allow_redirects=False,
+                        headers=headers
+                    )
+
+                    # Detection of /etc/passwd output
+                    if "root:x:0:0:root:/root:/bin/bash" in res.text:
+                        print(f"{Fore.RED}[+] Command injection detected{Style.RESET_ALL}")
+                        print(f"{Fore.GREEN}[+] Working payload: \"{line}\" [{res.status_code}]{Style.RESET_ALL}")
+                        print("-"*60)
+
+                except requests.exceptions.Timeout:
+                    print(f"{Fore.YELLOW}[!] Timeout for payload: {line}{Style.RESET_ALL}")
+
+                except requests.exceptions.ConnectionError:
+                    print(f"{Fore.YELLOW}[!] Connection error for payload: {line}{Style.RESET_ALL}")
+
+                except Exception as e:
+                    print(f"{Fore.RED}[!] Unexpected error with payload: {line}{Style.RESET_ALL}")
+                    print(f"    Error: {e}")
 
 
-
+ 
 
 def main():
     init()
@@ -195,6 +234,22 @@ def main():
             print("-"*60)
 
         search(wordlist,fc,mc)
+    
+    
+    if args.commandInjection:
+        print("[+] Started testing for command injection")
+        print("-"*60)
+
+        if args.commandInjection is True:
+            wordlist = get_default_wordlist("ci")
+            print(f"Using default: {wordlist}")
+            print("-"*60)
+        else:
+            wordlist = args.commandInjection
+            print(f"Using custom: {wordlist}")
+            print("-"*60)
+
+        cmdI(wordlist)
 
 if __name__=="__main__":
     main()

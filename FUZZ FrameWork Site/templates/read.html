@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>View File</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+            h1 {
+                color: #333;
+            }
+            .input-container {
+                margin-bottom: 20px;
+            }
+            input[type="text"] {
+                padding: 10px;
+                font-size: 16px;
+                width: 300px;
+                border-radius: 5px;
+                border: 1px solid #ccc;
+                margin-right: 10px;
+            }
+            button {
+                padding: 10px 20px;
+                font-size: 16px;
+                cursor: pointer;
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                border-radius: 5px;
+            }
+            button:hover {
+                background-color: #45a049;
+            }
+            .output-container {
+                margin-top: 20px;
+                padding: 15px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                background: #f9f9f9;
+                white-space: pre-wrap;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>View File</h1>
+        <p>Try to read flag.txt</p>
+
+        <div class="input-container">
+            <form method="POST">
+                <input type="text" name="filename" placeholder="/etc/passwd" required>
+                <button type="submit">Read File</button>
+            </form>
+        </div>
+
+        {% if content %}
+        <div class="output-container">
+            <h2>File Content</h2>
+            <pre>{{ content }}</pre>
+        </div>
+        {% endif %}
+    </body>
+</html>

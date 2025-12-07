@@ -3,7 +3,7 @@ import os
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta
-import urllib.parse
+from urllib.parse import unquote
 
 app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = 'lol_i_am_the_admin'
@@ -15,7 +15,7 @@ jwt = JWTManager(app)
 
 # Command injection filter 
 def filter(cmd):
-    notAllowed = ["flag.txt", "head", "tail", "flag"]
+    notAllowed = ["head", "cat", "tail", "etc","(",";",")","&","|"]
     for c in notAllowed:
         if c in cmd:
             return False
@@ -26,32 +26,35 @@ def filter(cmd):
 @jwt_required()
 def home():
     current_user = get_jwt_identity()
-    return send_from_directory("templates", "index.html")
+    return render_template("index.html")
 
-# SSTI challenge
-@app.route("/template")
+# LFI challenge
+@app.route("/read",methods=["GET","POST"])
 @jwt_required()
 def template():
-    current_user = get_jwt_identity()
-    name = request.args.get("name")
-    if name:
-        if '{' in name or '}' in name:
-            return render_template_string("Hacker", status_word="Hacker"), 403
+    if request.method=="GET":
+        return render_template("read.html")
+    elif request.method=="POST":
+        path = request.form.get("filename","")
+        if "/" in path: return "LOL try harder"
+        path=unquote(path)
+        if "../" in path:
+            path=path.replace("../","")
+        path=os.path.normpath(path)
+        try:
+            with open(path, "r", encoding="utf-8", errors="ignore") as file:
+                content = file.read()
+        except Exception as e:
+            content = f"Error: {e}"
 
-    html = f"""
-    <!DOCTYPE html>
-    <html>
-    <body>
-        <h2>Hi {name}</h2>
-    </body>
-    </html>
-    """
-    return render_template_string(html)
+        return render_template("view.html", content=content)
+
+    
 
 # Command injection 
 @app.route("/run", methods=["GET","POST"])
 @jwt_required()
-def about():
+def run():
     current_user = get_jwt_identity()
     cmd = request.form.get('cmd', '')
     
