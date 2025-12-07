@@ -1,5 +1,5 @@
 from flask import Flask, render_template, render_template_string, send_from_directory, request, redirect, url_for, jsonify, make_response
-from os import popen
+import os
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta
@@ -15,7 +15,7 @@ jwt = JWTManager(app)
 
 # Command injection filter 
 def filter(cmd):
-    notAllowed = ["flag.txt", "cat", "head", "tail", "flag"]
+    notAllowed = ["flag.txt", "head", "tail", "flag"]
     for c in notAllowed:
         if c in cmd:
             return False
@@ -49,11 +49,11 @@ def template():
     return render_template_string(html)
 
 # Command injection 
-@app.route("/run")
+@app.route("/run", methods=["GET","POST"])
 @jwt_required()
 def about():
     current_user = get_jwt_identity()
-    cmd = request.args.get('cmd', '')
+    cmd = request.form.get('cmd', '')
     
     if not cmd:
         return render_template("run.html", user=current_user)
@@ -62,7 +62,7 @@ def about():
     if not allowed:
         return render_template("run.html", output="Hacker", user=current_user), 403
     
-    output = popen(f"ping -c 2 {cmd}").read()
+    output = os.popen(f"ping -c 2 {cmd}").read()
     return render_template("run.html", output=f"{output}", user=current_user)
 
 @app.route("/login", methods=["GET", "POST"])
@@ -76,7 +76,7 @@ def login():
         if not username or not password:
             return jsonify({"error": "Username and password required"}), 400
 
-        if username == "admin" and password == "admin":
+        if username == "admin" and password == "monkey":
             # Create JWT token with username and password
             access_token = create_access_token(
                 identity=username,
@@ -98,16 +98,20 @@ def logout():
     return response
 
 
-# Handle unauthorized access - redirect to login
 @jwt.unauthorized_loader
 def unauthorized_callback(callback):
-    return redirect(url_for('login'))
+    return "Forbidden",403
 
 # Admin
 @app.route("/admin")
 @jwt_required()
 def admin():
-    return render_template("admin.html")
+    return os.getenv("FLAG1")
+
+@app.route('/robots.txt')
+def robots():
+    return send_from_directory(app.static_folder, 'robots.txt')
+
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5000)
