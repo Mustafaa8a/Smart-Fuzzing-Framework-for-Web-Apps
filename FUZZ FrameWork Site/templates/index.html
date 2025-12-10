@@ -1,77 +1,96 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>CTF Challenges</title>
-        <style>
-            body {
-                height: 100vh;
-                margin: 0;
-                display: flex;
-                justify-content: center;   /* center horizontally */
-                align-items: center;      /* center vertically */
-                background-color: #f5f5f5;
-                font-family: Arial, sans-serif;
-            }
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTF Challenges</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            position: relative;
+        }
 
-            /* --- Top-right logout button container --- */
-            .top-right {
-                position: absolute;
-                top: 20px;
-                right: 20px;
-            }
+        /* Logout button */
+        .top-right {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
 
-            .logout-btn {
-                padding: 12px 25px;
-                font-size: 18px;
-                cursor: pointer;
-                background-color: #e74c3c;
-                color: white;
-                border: none;
-                border-radius: 8px;
-            }
+        .logout-btn {
+            padding: 12px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            transition: 0.2s;
+        }
+        .logout-btn:hover {
+            background: #c0392b;
+        }
 
-            .logout-btn:hover {
-                background-color: #c0392b;
-            }
+        /* Center card */
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            width: 400px;
+            text-align: center;
+        }
 
-            .button-container {
-                display: flex;
-                flex-direction: column;
-                gap: 30px; /* space between buttons */
-                text-align: center;
-            }
+        h2 {
+            color: #333;
+            margin-bottom: 30px;
+        }
 
-            button {
-                padding: 20px 40px;     /* bigger padding */
-                font-size: 22px;        /* bigger text */
-                cursor: pointer;
-                background-color: #4CAF50;
-                color: white;
-                border: none;
-                border-radius: 10px;    /* larger radius */
-                width: 300px;           /* bigger width */
-                height: 80px;           /* bigger height */
-            }
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
 
-            button:hover {
-                background-color: #45a049;
-            }
-        </style>
-    </head>
-    <body>
+        button {
+            padding: 18px;
+            font-size: 18px;
+            cursor: pointer;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            transition: 0.2s;
+        }
+        button:hover {
+            background: #5a6fd8;
+        }
+    </style>
+</head>
+<body>
 
-        <!-- Logout Button (POST request using form) -->
-        <div class="top-right">
-            <form action="/logout" method="POST">
-                <button type="submit" class="logout-btn">Logout</button>
-            </form>
-        </div>
+    <!-- Logout Button -->
+    <div class="top-right">
+        <form action="/logout" method="POST">
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+    </div>
+
+    <!-- Main Content Box -->
+    <div class="card">
+        <h2>CTF Challenges</h2>
 
         <div class="button-container">
             <button onclick="window.location.href='/run'">Command Injection</button>
             <button onclick="window.location.href='/read'">LFI</button>
         </div>
+    </div>
 
-    </body>
+</body>
 </html>

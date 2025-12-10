@@ -7,7 +7,7 @@ from urllib.parse import unquote
 
 app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = 'lol_i_am_the_admin'
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=8)
 app.config['JWT_TOKEN_LOCATION'] = ['cookies']
 app.config['JWT_COOKIE_CSRF_PROTECT'] = False  
 
@@ -82,8 +82,7 @@ def login():
         if username == "admin" and password == "monkey":
             # Create JWT token with username and password
             access_token = create_access_token(
-                identity=username,
-                additional_claims={"password": password}
+                identity=username
             )
             
             # Create response and set JWT token in cookie
